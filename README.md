@@ -68,5 +68,9 @@ gocql-scylladb-issue-reproduction/
 └── tests/reproduction_test.go
 ```
 
+## Repository
+- **GitHub**: https://github.com/dil-tbako/gocql-scylladb-issue-reproduction
+- **Clone**: `git clone https://github.com/dil-tbako/gocql-scylladb-issue-reproduction.git`
+
 ## Contributing
 This is a bug reproduction repository. If you can reproduce or cannot reproduce the issue on your platform, please open an issue with your platform details.

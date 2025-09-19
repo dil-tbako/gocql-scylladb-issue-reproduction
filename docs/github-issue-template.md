@@ -15,11 +15,11 @@ DELETE operations targeting composite primary key tables by partition key only f
   - Linux AMD64 (CI environments)
 
 **Reproduction**  
-Complete reproduction repository available at: https://github.com/tbako/gocql-scylladb-issue-reproduction
+Complete reproduction repository available at: https://github.com/dil-tbako/gocql-scylladb-issue-reproduction
 
 ### Quick Reproduction
 ```bash
-git clone https://github.com/tbako/gocql-scylladb-issue-reproduction
+git clone https://github.com/dil-tbako/gocql-scylladb-issue-reproduction
 cd gocql-scylladb-issue-reproduction
 docker-compose up -d
 go test ./tests/... -v

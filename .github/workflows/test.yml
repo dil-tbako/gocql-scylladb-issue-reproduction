@@ -1,0 +1,84 @@
+name: Cross-Platform Issue Reproduction
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    
+    - name: Start ScyllaDB
+      run: docker-compose up -d
+    
+    - name: Wait for ScyllaDB
+      run: |
+        timeout 120s bash -c 'until docker-compose exec scylladb cqlsh -e "DESCRIBE KEYSPACES" > /dev/null 2>&1; do sleep 5; done'
+    
+    - name: Setup Schema
+      run: docker-compose exec scylladb cqlsh -f /scripts/setup-schema.cql
+      
+    - name: Run Manual Verification
+      run: chmod +x scripts/manual-verification.sh && ./scripts/manual-verification.sh
+    
+    - name: Run Tests
+      run: go test ./tests/... -v
+      
+    - name: Platform Info
+      run: |
+        echo "Platform: $(uname -a)"
+        echo "Go Version: $(go version)"
+        echo "Docker Version: $(docker --version)"
+
+  test-macos-arm64:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        
+    - name: Start ScyllaDB
+      run: docker-compose up -d
+    
+    - name: Wait for ScyllaDB
+      run: |
+        timeout 120s bash -c 'until docker-compose exec scylladb cqlsh -e "DESCRIBE KEYSPACES" > /dev/null 2>&1; do sleep 5; done'
+    
+    - name: Setup Schema
+      run: docker-compose exec scylladb cqlsh -f /scripts/setup-schema.cql
+      
+    - name: Run Manual Verification
+      run: chmod +x scripts/manual-verification.sh && ./scripts/manual-verification.sh
+    
+    - name: Run Tests
+      run: go test ./tests/... -v
+      
+    - name: Platform Info
+      run: |
+        echo "Platform: $(uname -a)"
+        echo "Go Version: $(go version)"
+        echo "Docker Version: $(docker --version)"
+        echo "Architecture: $(uname -m)"
+
+  comparison:
+    needs: [test-linux-amd64, test-macos-arm64]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+    - name: Compare Results
+      run: |
+        echo "This job runs after both platform tests complete"
+        echo "Check the logs above to compare Linux AMD64 vs macOS ARM64 behavior"
+        echo "Look for differences in test results between platforms"

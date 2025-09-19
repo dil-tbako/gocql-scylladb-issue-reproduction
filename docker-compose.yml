@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  scylladb:
+    image: scylladb/scylla:5.2
+    platform: linux/amd64  # Force AMD64 even on M1/M2/M3 Macs
+    container_name: scylla-reproduction
+    ports:
+      - "9043:9042"
+      - "9161:9160" 
+      - "10001:10000"
+    environment:
+      - SCYLLA_CLUSTER_NAME=reproduction-cluster
+    command: >
+      --seeds=scylladb
+      --smp 1
+      --memory 1G
+      --overprovisioned 1
+      --api-address 0.0.0.0
+      --listen-address 0.0.0.0
+      --rpc-address 0.0.0.0
+      --broadcast-address 127.0.0.1
+      --broadcast-rpc-address 127.0.0.1
+      --developer-mode=1
+    volumes:
+      - scylla-data:/var/lib/scylla
+      - ./scripts:/scripts
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  scylla-data:
